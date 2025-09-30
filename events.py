@@ -33,6 +33,7 @@ s3_client = boto3.client(
     region_name=app.config['S3_REGION']
 )
 
+# find which database the given event is in by querying calendar
 def query_calendar(event_id):
     event = calendar.find_one({"_id": ObjectId(event_id)})
     if (event):
@@ -56,10 +57,12 @@ def get_image_path(event_path):
 
 """this returns a JSON response in the form of:
 {
-    "name"      : "ObjectID",
-    "path"      : "event_path",
-    "desc"      : "description",
-    "num_img"   : "num"
+    "data" : {
+        "name"      : "ObjectID",
+        "path"      : "event_path",
+        "desc"      : "description",
+        "num_img"   : "num"
+    }
 }"""
 def format_JSON_response(event_id, event_db):
     # find image given the id
@@ -76,11 +79,13 @@ def format_JSON_response(event_id, event_db):
     count = get_image_path(path)
     event["num_img"] = count
 
-    # convert ObjectId to string for better jsonify
+    # convert ObjectId to string for easier jsonify
     event["_id"] = str(event["_id"])
 
+    # set up the dictionary as "data" : {event info} 
     jdict = {"data" : event}
 
+    # convert to json
     return json_util.dumps(jdict)
 
 def main(event_id):
