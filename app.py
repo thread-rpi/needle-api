@@ -3,11 +3,14 @@ import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
+from current_fotw import current_fotw
 
 SERVER_TIMEOUT = 5000 # client will error if a connection isn't made within 5 seconds of its first request
 
 # Initialize flask application
 app = Flask(__name__)
+
+# MongoDB Configuration
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
 
@@ -15,6 +18,13 @@ client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=S
 eventsDB = client['eventsDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
+
+fotDB = client['fotDB']
+fot = fotDB['fot']
+
+memberDB = client['memberDB']
+member = memberDB['member']
+
 
 # Routes
 @app.route("/")
@@ -44,6 +54,9 @@ def health_check():
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
 
+@app.route("/api/event/current_fotw", methods=["GET"])
+def get_current_fotw():
+    return current_fotw(fot)
 
 if __name__ == "__main__":
     app.run(debug=True)
