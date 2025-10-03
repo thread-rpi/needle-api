@@ -16,6 +16,7 @@ def get_shoot(shoots, shoot_id):
                 "path": shoot.get("path", ""),
                 "desc": shoot.get("desc", ""),
                 "personnel": shoot.get("personnel", []),
+                "img_count": shoot.get("img_count", 0)
             }
         }
         return jsonify(shoot_data)
