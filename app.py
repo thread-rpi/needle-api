@@ -10,7 +10,7 @@ SERVER_TIMEOUT = 5000 # client will error if a connection isn't made within 5 se
 # Initialize flask application
 app = Flask(__name__)
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
-client = pymongo.MongoClient(app.config['MONGO_URI'])
+client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
 
 # Initialize databases
 eventsDB = client['eventsDB']
