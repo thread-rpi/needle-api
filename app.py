@@ -3,6 +3,7 @@ import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
+from get_semester import get_semester
 
 SERVER_TIMEOUT = 5000 # client will error if a connection isn't made within 5 seconds of its first request
 
@@ -15,6 +16,7 @@ client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=S
 eventsDB = client['eventsDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
+calendar = eventsDB['calendar']
 
 # Routes
 @app.route("/")
@@ -43,6 +45,10 @@ def health_check():
 @app.route("/api/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
+
+@app.route("/api/events/<semester_id>", methods=["GET"])
+def get_semester_route(semester_id):
+    return get_semester(calendar, semester_id)
 
 
 if __name__ == "__main__":
