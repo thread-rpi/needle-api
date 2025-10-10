@@ -5,6 +5,7 @@ import os
 from get_shoot import get_shoot
 from get_members import get_members
 from current_fotw import current_fotw
+from reigningFOT import reigning_foty, reigning_fotm
 
 SERVER_TIMEOUT = 5000 # client will error if a connection isn't made within 5 seconds of its first request
 
@@ -62,6 +63,14 @@ def get_members_route(year):
 @app.route("/api/event/current_fotw", methods=["GET"])
 def get_current_fotw():
     return current_fotw(fot)
+
+@app.route('/api/fot/reigningFOTY', methods=['GET'])
+def get_reigning_fotY():
+    return reigning_foty(fot)
+
+@app.route('/api/fot/reigningFOTM', methods=['GET'])
+def get_reigning_fotM():
+    return reigning_fotm(fot)
 
 if __name__ == "__main__":
     app.run(debug=True)
