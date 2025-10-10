@@ -15,7 +15,7 @@ def format_member(member):
 
 # members: MongoDb member collection
 # year_string: String representing a school year of form [yy]
-# returns all memebr data for the given year
+# returns all member data for the given year
 def get_members(members, year_string):
     # Check if string is correct length
     if len(year_string) != 2:
