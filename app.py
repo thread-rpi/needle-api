@@ -3,6 +3,7 @@ import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
+from get_members import get_members
 from current_fotw import current_fotw
 
 SERVER_TIMEOUT = 5000 # client will error if a connection isn't made within 5 seconds of its first request
@@ -53,6 +54,10 @@ def health_check():
 @app.route("/api/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
+
+@app.route("/api/member/<year>", methods=["GET"])
+def get_members_route(year):
+    return get_members(member, year)
 
 @app.route("/api/event/current_fotw", methods=["GET"])
 def get_current_fotw():
