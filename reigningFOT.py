@@ -24,11 +24,11 @@ def reigning_foty(fot_collection):
             foty = serialize_mongo_doc(foty)
             return jsonify({
                 "success": True,
-                "current_foty": foty
+                "reigning_foty": foty
             }), 200
         else:
             return jsonify({
-                "message": "no Fit of the Year found."
+                "message": "no reigning Fit of the Year found."
             }), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -46,10 +46,10 @@ def reigning_fotm(fot_collection):
             fotm_list = [serialize_mongo_doc(f) for f in fotm_list]
             return jsonify({
                 "success": True,
-                "recent_fotm": fotm_list,
+                "reigning_fotm": fotm_list,
                 "count": len(fotm_list)
             }), 200
         else:
-            return jsonify({"message": "no recent Fits of the Month found."}), 404
+            return jsonify({"message": "no reigning Fits of the Month found."}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
