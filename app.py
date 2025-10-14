@@ -5,6 +5,7 @@ import os
 from get_shoot import get_shoot
 from get_members import get_members
 from current_fotw import current_fotw
+from get_recent_content import get_recent_content
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000 
@@ -22,6 +23,7 @@ fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
+calendar = eventsDB['calendar']
 fot = fotDB['fot']
 member = memberDB['member']
  
@@ -67,6 +69,10 @@ def get_members_route(year):
 @app.route("/api/event/current_fotw", methods=["GET"])
 def get_current_fotw():
     return current_fotw(fot)
+
+@app.route("/api/events/recent_events", methods=["GET"])
+def get_recent_events():
+    return get_recent_content(calendar, events, shoots)
 
 if __name__ == "__main__":
     app.run(debug=True)
