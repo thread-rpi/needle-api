@@ -1,6 +1,5 @@
-from flask import Flask, jsonify
-from bson import ObjectId
-from datetime import datetime, timedelta, timezone
+from flask import jsonify
+from datetime import datetime
 
 def serialize_mongo_doc(doc):
     """Convert MongoDB ObjectId and datetime to serializable format"""
@@ -17,7 +16,7 @@ def reigning_foty(fot_collection):
     """
     try:
         foty = fot_collection.find_one(
-            {"type": "yearWin"},
+            {"yearWin": True},
             sort=[("date", -1)]
         )
         if foty:
@@ -40,7 +39,7 @@ def reigning_fotm(fot_collection):
     """
     try:
         fotm_list = list(
-            fot_collection.find({"type": "monthWin"}).sort("date", -1).limit(3)
+            fot_collection.find({"monthWin": True}).sort("date", -1).limit(3)
         )
         if fotm_list:
             fotm_list = [serialize_mongo_doc(f) for f in fotm_list]
