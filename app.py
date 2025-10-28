@@ -4,6 +4,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
 from get_members import get_members
+from get_semester import get_semester
 from current_fotw import current_fotw
 from reigningFOT import reigning_foty, reigning_fotm
 
@@ -23,6 +24,7 @@ fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
+calendar = eventsDB['calendar']
 fot = fotDB['fot']
 member = memberDB['member']
  
@@ -76,6 +78,10 @@ def get_reigning_fotY():
 @app.route('/api/fot/reigningFOTM', methods=['GET'])
 def get_reigning_fotM():
     return reigning_fotm(fot)
+
+@app.route("/api/events/<semester_id>", methods=["GET"])
+def get_semester_route(semester_id):
+    return get_semester(calendar, semester_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
