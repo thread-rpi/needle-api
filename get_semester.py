@@ -9,29 +9,35 @@ def get_semester(calendar_db, semester_id):
         "F": (9, 12)
     }
 
-    try: 
-        # check that the semester is valid
-        if semester_id[0] in semester_map.keys():
-            semester = semester_id[0]
-        else:
-            # otherwise take the current semester
-            month = datetime.now(timezone.utc).month
-            semester = ""
-            for sem, months in semester_map.items():
-                if months[0] <= month <= months[1]:
-                    semester = sem
-                    break
+    last_month_days = {
+        4: 30,
+        8: 31,
+        12: 31
+    }
 
+    # check that the semester is valid
+    if semester_id[0] in semester_map.keys():
+        semester = semester_id[0]
+    else:
+        # otherwise take the current semester
+        month = datetime.now(timezone.utc).month
+        semester = ""
+        for sem, months in semester_map.items():
+            if months[0] <= month <= months[1]:
+                semester = sem
+                break
+
+    try: 
         # make sure that the year is valid, otherwise take current year
-        try:
-            if int(semester_id[1:]) >= 25:  # first year of the club, all data will be in or after 2025
-                year = int(semester_id[1:]) + 2000
-        except:
+        if int(semester_id[1:]) >= 25:  # first year of the club, all data will be in or after 2025
+            year = int(semester_id[1:]) + 2000
+        else:
             year = datetime.now(timezone.utc).year
+            
 
         # create a range of dates for the semester
         start_date = datetime(year, semester_map[semester][0], 1)
-        end_date = datetime(year, semester_map[semester][1], 31)
+        end_date = datetime(year, semester_map[semester][1], last_month_days[semester_map[semester][1]])
 
         # create a query 
         query = {
