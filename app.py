@@ -3,8 +3,8 @@ import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
-from get_semester import get_semester
 from get_members import get_members
+from get_semester import get_semester
 from current_fotw import current_fotw
 from reigningFOT import reigning_foty, reigning_fotm
 
