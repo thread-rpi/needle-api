@@ -64,7 +64,7 @@ def health_check():
 
 @app.route("/api/events/<event_id>", methods=["GET"])
 def get_event_details(event_id):
-    return get_details(calendar, events, shoots, event_id, s3_client, app.config["S3_BUCKET_NAME"])
+    return get_details(events, event_id, s3_client, app.config["S3_BUCKET_NAME"])
 
 
 if __name__ == "__main__":
