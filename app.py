@@ -72,7 +72,7 @@ def get_current_fotw():
 
 @app.route("/api/events/recent_events", methods=["GET"])
 def get_recent_events():
-    return get_recent_content(calendar, events, shoots)
+    return get_recent_content(events)
 
 if __name__ == "__main__":
     app.run(debug=True)
