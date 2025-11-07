@@ -1,7 +1,7 @@
 from flask import jsonify
 from datetime import datetime, timezone
 
-def get_semester(calendar_db, semester_id):
+def get_semester(events, semester_id):
     # map semesters to the corresponding months
     semester_map = {
         "S": (1, 4),
@@ -48,7 +48,7 @@ def get_semester(calendar_db, semester_id):
         }
 
         # look for all events in the query
-        events = list(calendar_db.find(query))
+        events = list(events.find(query))
 
         if events:
             # if events found, clean up data and jsonify

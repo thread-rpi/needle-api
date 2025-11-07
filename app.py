@@ -81,7 +81,7 @@ def get_reigning_fotM():
 
 @app.route("/api/events/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
-    return get_semester(calendar, semester_id)
+    return get_semester(events, semester_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
