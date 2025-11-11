@@ -9,17 +9,18 @@ def get_semester(events, semester_id):
         "F": (9, 12)
     }
 
+    # record the how many days are in the last month of each semester
     last_month_days = {
         4: 30,
         8: 31,
         12: 31
     }
 
-    # check that the semester is valid
+    # check that the semester id is valid (S, A, or F)
     if semester_id[0] in semester_map.keys():
         semester = semester_id[0]
     else:
-        # otherwise take the current semester
+        # otherwise use the current semester
         month = datetime.now(timezone.utc).month
         semester = ""
         for sem, months in semester_map.items():
@@ -53,7 +54,13 @@ def get_semester(events, semester_id):
         if events:
             # if events found, clean up data and jsonify
             for event in events:
-                event['_id'] = str(event['_id'])
+                event['_id'] = str(event['_id']) # cast id to string
+                
+                # cast all personnel ids to strings
+                for i in range(len(event['personnel'])):
+                    event['personnel'][i] = str(event['personnel'][i])
+
+                # format date
                 if isinstance(event['date'], datetime):
                     event['date'] = event['date'].isoformat()
 
