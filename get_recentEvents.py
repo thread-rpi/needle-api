@@ -2,19 +2,26 @@ from flask import jsonify
 from bson import ObjectId
 from datetime import datetime, timedelta, timezone
 
-def get_recentEvents(calander_collection):
-    current = datetime.now(timezone.utc)
+def get_recentEvents(events_collection):
 
+    '''
+    An endpoint that provides high level data on the recently past and upcoming Thread events.
+
+    Arguements: 
+        events_collection: MongoDB Collection for all Thread events (events collection in EventsDB)
+
+    Returns:
+        JSON response with the 3 most recently past events amnd the 4 soonest upcoming events 
+    '''
     try:
+        current = datetime.now(timezone.utc)
         # Find 3 most recent past events
-        past_events = list(calander_collection.find({
-            "type": "event",
+        past_events = list(events_collection.find({
             "date": {"$lte": current}
         }).sort("date", -1).limit(3))
 
         # Find 4 soonest upcoming events
-        up_events = list(calander_collection.find({
-            "type": "event", 
+        up_events = list(events_collection.find({
             "date": {"$gte": current}
         }).sort("date", 1).limit(4))
 
