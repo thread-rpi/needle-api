@@ -64,10 +64,8 @@ def health_check():
 @app.route("/login", methods=["POST"])
 def login():
     username = request.json.get('username', None)
-    password = request.json.get('passowrd', None)
-    login_protocol(username, password, member, admin)
-
-
+    password = request.json.get('password', None)
+    return login_protocol(username, password, member, admin)
 
 @app.route("/api/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
