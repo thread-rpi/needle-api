@@ -21,6 +21,7 @@ def login_protocol(username, password, members, admin):
             # if given password doesn't match the database, return error
             if password != password_check["password"]:
                 return jsonify({"error": "Credentials could not be authenticated."}), 401
+            # otherwise create an access token and return it in a JSON response
             else:
                 return jsonify({"data": {"token": create_access_token(identity = username)}}), 200
         # if no such user exists in admin, return error
