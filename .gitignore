@@ -31,7 +31,7 @@ yarn-error.log*
 
 # env files and virtual environment (can opt-in for committing if needed)
 .env*
-venv/
+.venv/
 
 # vercel
 .vercel
