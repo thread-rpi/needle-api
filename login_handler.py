@@ -8,7 +8,7 @@ def login_protocol(username, password, members, admin):
     
     # find all users with matching usernames (should only be one, but we'll verify)
     user = list(members.find({"email": username}))
-
+    print(user)
     # check that only one matching user exists 
     if len(user) == 1:
         # get the user and extract their ID

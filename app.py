@@ -26,8 +26,8 @@ memberDB = client['memberDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
 fot = fotDB['fot']
-member = memberDB['member']
-admin = memberDB['admin']
+member = memberDB['members']
+admin = memberDB['admins']
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
