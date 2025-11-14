@@ -6,6 +6,7 @@ import os
 from get_shoot import get_shoot
 from get_members import get_members
 from current_fotw import current_fotw
+from get_recent_content import get_recent_content
 from reigningFOT import reigning_foty, reigning_fotm
 from login_handler import login_protocol
 
@@ -20,11 +21,12 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
-eventsDB = client['eventsDB']
+eventsDB = client['eventDB']
 fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
-events = eventsDB['event']
+events = eventsDB['events']
+calendar = eventsDB['calendar']
 fot = fotDB['fot']
 member = memberDB['members']
 admin = memberDB['admins']
@@ -78,6 +80,10 @@ def get_members_route(year):
 @app.route("/api/event/current_fotw", methods=["GET"])
 def get_current_fotw():
     return current_fotw(fot)
+
+@app.route("/api/events/recent_events", methods=["GET"])
+def get_recent_events():
+    return get_recent_content(events)
 
 @app.route('/api/fot/reigningFOTY', methods=['GET'])
 def get_reigning_fotY():
