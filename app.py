@@ -8,6 +8,7 @@ from get_shoot import get_shoot
 from get_members import get_members
 from current_fotw import current_fotw
 from reigningFOT import reigning_foty, reigning_fotm
+from get_event_details import get_details
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000 
@@ -20,11 +21,11 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
-eventsDB = client['eventsDB']
+eventsDB = client['eventDB']
 fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
-events = eventsDB['event']
+events = eventsDB['events']
 fot = fotDB['fot']
 member = memberDB['member']
  
@@ -78,6 +79,10 @@ def get_reigning_fotY():
 @app.route('/api/fot/reigningFOTM', methods=['GET'])
 def get_reigning_fotM():
     return reigning_fotm(fot)
+
+@app.route("/api/events/details/<event_id>")
+def get_event_details(event_id):
+    return get_details(events, event_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
