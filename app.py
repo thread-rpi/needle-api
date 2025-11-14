@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
@@ -6,9 +7,10 @@ from get_shoot import get_shoot
 from get_members import get_members
 from current_fotw import current_fotw
 from reigningFOT import reigning_foty, reigning_fotm
+from login_handler import login_protocol
 
 # client will error if a connection isn't made within 5 seconds of its first request
-SERVER_TIMEOUT = 5000 
+SERVER_TIMEOUT = 5000 \
 
 # Initialize flask application
 app = Flask(__name__)
@@ -24,7 +26,11 @@ memberDB = client['memberDB']
 shoots = eventsDB['shoot']
 events = eventsDB['event']
 fot = fotDB['fot']
-member = memberDB['member']
+member = memberDB['members']
+admin = memberDB['admins']
+
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
+jwt = JWTManager(app)
  
 @app.after_request
 # Globally modify response headers before requests
@@ -37,7 +43,6 @@ def add_header(response):
 @app.route("/")
 def root():
     return "Welcome to Needle!"
-
 
 @app.route("/health")
 def health_check():
@@ -56,6 +61,11 @@ def health_check():
 
     return jsonify(res), http_status_code
 
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    return login_protocol(username, password, member, admin)
 
 @app.route("/api/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
