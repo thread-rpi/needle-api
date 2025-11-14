@@ -18,11 +18,11 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
-eventsDB = client['eventsDB']
+eventsDB = client['eventDB']
 fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
-events = eventsDB['event']
+events = eventsDB['events']
 calendar = eventsDB['calendar']
 fot = fotDB['fot']
 member = memberDB['member']
