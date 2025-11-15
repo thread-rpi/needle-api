@@ -5,6 +5,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from get_shoot import get_shoot
 from get_members import get_members
+from get_semester import get_semester
 from current_fotw import current_fotw
 from reigningFOT import reigning_foty, reigning_fotm
 from login_handler import login_protocol
@@ -20,11 +21,12 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
-eventsDB = client['eventsDB']
+eventsDB = client['eventDB']
 fotDB = client['fotDB']
 memberDB = client['memberDB']
 shoots = eventsDB['shoot']
-events = eventsDB['event']
+events = eventsDB['events']
+calendar = eventsDB['calendar']
 fot = fotDB['fot']
 member = memberDB['members']
 admin = memberDB['admins']
@@ -86,6 +88,10 @@ def get_reigning_fotY():
 @app.route('/api/fot/reigningFOTM', methods=['GET'])
 def get_reigning_fotM():
     return reigning_fotm(fot)
+
+@app.route("/api/events/<semester_id>", methods=["GET"])
+def get_semester_route(semester_id):
+    return get_semester(events, semester_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
