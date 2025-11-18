@@ -70,7 +70,7 @@ def get_semester(events, semester_id):
         else:
             # otherwise, jsonfiy a message saying no events
             return jsonify({
-                "message": "no events found"
+                "error": "no events found"
             }), 500
 
     except Exception as e:
