@@ -3,7 +3,6 @@ from bson import ObjectId
 from datetime import datetime, timedelta, timezone
 
 def get_recentEvents(events_collection):
-
     '''
     An endpoint that provides high level data on the recently past and upcoming Thread events.
 
@@ -34,15 +33,10 @@ def get_recentEvents(events_collection):
 
         
         return jsonify({
-            "success": True,
             "events": up_events + past_events  
         }), 200
 
     except Exception as e:
-        # Fixed error response - use jsonify() not jsonify.dumps()
-        error_response = {
-            "success": False,
-            "events": [],
-            "error": "No events to show"
-        }
-        return jsonify(error_response), 500
+        return jsonify({
+            "error": f"something went wrong: {str(e)}"
+        }), 500
