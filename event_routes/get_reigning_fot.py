@@ -1,15 +1,8 @@
 from flask import jsonify
 from datetime import datetime
+from event_routes.event_helpers import serialize_mongo_doc
 
-def serialize_mongo_doc(doc):
-    """Convert MongoDB ObjectId and datetime to serializable format"""
-    doc['_id'] = str(doc['_id'])
-    if isinstance(doc.get('date'), datetime):
-        doc['date'] = doc['date'].isoformat()
-    return doc
-
-
-def reigning_foty(fot_collection):
+def get_reigning_foty(fot_collection):
     """
     Get the reigning Fit of the Year (FOTY)
     - Returns the most recent FOTY based on date
@@ -33,7 +26,7 @@ def reigning_foty(fot_collection):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-def reigning_fotm(fot_collection):
+def get_reigning_fotm(fot_collection):
     """
     Get the 3 most recent Fits of the Month (FOTM)
     """
