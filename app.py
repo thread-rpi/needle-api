@@ -3,12 +3,12 @@ from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
-from eventRoutes.get_shoot import get_shoot
-from memberRoutes.get_members import get_members
-from eventRoutes.get_currentFOTW import current_fotw
-from eventRoutes.get_reigningFOT import reigning_foty, reigning_fotm
-from adminRoutes.login_handler import login_protocol
-from eventRoutes.get_recentEvents import get_recentEvents
+from event_routes.get_shoot import get_shoot
+from member_routes.get_members import get_members
+from event_routes.get_current_fotw import get_current_fotw
+from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
+from admin_routes.login_handler import login_protocol
+from event_routes.get_recent_events import get_recent_events
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000 \
@@ -75,20 +75,20 @@ def get_members_route(year):
     return get_members(member, year)
 
 @app.route("/current_fotw", methods=["GET"])
-def get_current_fotw():
-    return current_fotw(fot)
+def get_current_fotw_route():
+    return get_current_fotw(fot)
 
 @app.route('/reigningFOTY', methods=['GET'])
-def get_reigning_fotY():
-    return reigning_foty(fot)
+def get_reigning_foty_route():
+    return get_reigning_foty(fot)
 
 @app.route('/reigningFOTM', methods=['GET'])
-def get_reigning_fotM():
-    return reigning_fotm(fot)
+def get_reigning_fotm_route():
+    return get_reigning_fotm(fot)
 
 @app.route("/event/recents", methods=["GET"])
-def get_recentEvents_route():
-    return get_recentEvents(events)
+def get_recent_events_route():
+    return get_recent_events(events)
 
 if __name__ == "__main__":
     app.run(debug=True)

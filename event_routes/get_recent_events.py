@@ -1,8 +1,8 @@
 from flask import jsonify
 from datetime import datetime, timedelta, timezone
-from eventHelpers import convert_objectid_to_str
+from event_routes.event_helpers import serialize_mongo_doc
 
-def getRecentEvents(events_collection):
+def get_recent_events(events_collection):
   '''
   An endpoint that provides high level data on the recently past and upcoming Thread events.
 
@@ -34,8 +34,8 @@ def getRecentEvents(events_collection):
     }), 500
 
   # convert ObjectId to string for JSON serialization
-  past_events = [convert_objectid_to_str(event) for event in past_events]
-  up_events = [convert_objectid_to_str(event) for event in up_events]
+  past_events = serialize_mongo_doc(past_events)
+  up_events = serialize_mongo_doc(up_events)
 
   return jsonify({
     "data": {
