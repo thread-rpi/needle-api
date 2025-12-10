@@ -70,23 +70,23 @@ def login():
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
 
-@app.route("/member/<year>", methods=["GET"])
+@app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
     return get_members(member, year)
 
-@app.route("/current_fotw", methods=["GET"])
+@app.route("/current-fotw", methods=["GET"])
 def get_current_fotw_route():
     return get_current_fotw(fot)
 
-@app.route('/reigningFOTY', methods=['GET'])
+@app.route('/reigning-foty', methods=['GET'])
 def get_reigning_foty_route():
     return get_reigning_foty(fot)
 
-@app.route('/reigningFOTM', methods=['GET'])
+@app.route('/reigning-fotm', methods=['GET'])
 def get_reigning_fotm_route():
     return get_reigning_fotm(fot)
 
-@app.route("/event/recents", methods=["GET"])
+@app.route("/recent-events", methods=["GET"])
 def get_recent_events_route():
     return get_recent_events(events)
 
