@@ -2,7 +2,7 @@ from flask import jsonify
 from bson import ObjectId
 from datetime import datetime, timedelta, timezone
 
-def current_fotw(fot_collection):
+def get_current_fotw(fot_collection):
     """
     Get the current Fit of the Week (FOTW) based on date range (Sunday to Saturday)
     
