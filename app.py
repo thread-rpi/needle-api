@@ -3,12 +3,13 @@ from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
-from get_shoot import get_shoot
-from get_members import get_members
+from event_routes.get_shoot import get_shoot
+from member_routes.get_members import get_members
 from get_semester import get_semester
-from current_fotw import current_fotw
-from reigningFOT import reigning_foty, reigning_fotm
-from login_handler import login_protocol
+from event_routes.get_current_fotw import get_current_fotw
+from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
+from admin_routes.login_handler import login_protocol
+from event_routes.get_recent_events import get_recent_events
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000 \
@@ -22,12 +23,9 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
 eventsDB = client['eventDB']
-fotDB = client['fotDB']
 memberDB = client['memberDB']
-shoots = eventsDB['shoot']
+
 events = eventsDB['events']
-calendar = eventsDB['calendar']
-fot = fotDB['fot']
 member = memberDB['members']
 admin = memberDB['admins']
 
@@ -69,25 +67,29 @@ def login():
     password = request.json.get('password', None)
     return login_protocol(username, password, member, admin)
 
-@app.route("/api/shoot/<shoot_id>", methods=["GET"])
+@app.route("/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
 
-@app.route("/api/member/<year>", methods=["GET"])
+@app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
     return get_members(member, year)
 
-@app.route("/api/event/current_fotw", methods=["GET"])
-def get_current_fotw():
-    return current_fotw(fot)
+@app.route("/current-fotw", methods=["GET"])
+def get_current_fotw_route():
+    return get_current_fotw(fot)
 
-@app.route('/api/fot/reigningFOTY', methods=['GET'])
-def get_reigning_fotY():
-    return reigning_foty(fot)
+@app.route('/reigning-foty', methods=['GET'])
+def get_reigning_foty_route():
+    return get_reigning_foty(fot)
 
-@app.route('/api/fot/reigningFOTM', methods=['GET'])
-def get_reigning_fotM():
-    return reigning_fotm(fot)
+@app.route('/reigning-fotm', methods=['GET'])
+def get_reigning_fotm_route():
+    return get_reigning_fotm(fot)
+
+@app.route("/recent-events", methods=["GET"])
+def get_recent_events_route():
+    return get_recent_events(events)
 
 @app.route("/api/events/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
