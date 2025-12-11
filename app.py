@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
-from event_routes.get_shoot import get_shoot
+from event_routes.get_event import get_event
 from member_routes.get_members import get_members
 from event_routes.get_semester import get_semester
 from event_routes.get_current_fotw import get_current_fotw
@@ -68,9 +68,9 @@ def login():
     password = request.json.get('password', None)
     return login_protocol(username, password, member, admin)
 
-@app.route("/shoot/<shoot_id>", methods=["GET"])
-def get_shoot_route(shoot_id):
-    return get_shoot(shoots, shoot_id)
+@app.route("/event/<event_id>", methods=["GET"])
+def get_event_route(event_id):
+    return get_event(events, event_id)
 
 @app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
