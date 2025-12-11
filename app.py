@@ -5,7 +5,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from event_routes.get_shoot import get_shoot
 from member_routes.get_members import get_members
-from get_semester import get_semester
+from event_routes.get_semester import get_semester
 from event_routes.get_current_fotw import get_current_fotw
 from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
 from admin_routes.login_handler import login_protocol
@@ -91,7 +91,7 @@ def get_reigning_fotm_route():
 def get_recent_events_route():
     return get_recent_events(events)
 
-@app.route("/api/events/<semester_id>", methods=["GET"])
+@app.route("/semester/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
     return get_semester(events, semester_id)
 
