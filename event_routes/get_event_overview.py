@@ -1,8 +1,8 @@
 from flask import jsonify
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from event_routes.event_helpers import serialize_mongo_doc
 
-def get_recent_events(events_collection):
+def get_event_overview(events_collection):
   '''
   An endpoint that provides high level data on the recently past and upcoming Thread events.
 
@@ -10,7 +10,7 @@ def get_recent_events(events_collection):
       events_collection: MongoDB Collection for all Thread events (events collection in EventsDB)
 
   Returns:
-      JSON response with the 3 most recently past events amnd the 4 soonest upcoming events 
+      JSON response with the 3 most recently past events and the 4 soonest upcoming events 
   '''
   current = datetime.now(timezone.utc)
   # Find 3 most recent past events

@@ -29,14 +29,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# vscode
-__pycache__
-
 # env files and virtual environment (can opt-in for committing if needed)
 .env*
 .venv/
 
 # python
+__pycache__
 __pycache__/
 
 # vscode

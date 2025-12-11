@@ -7,9 +7,10 @@ from event_routes.get_shoot import get_shoot
 from member_routes.get_members import get_members
 from event_routes.get_semester import get_semester
 from event_routes.get_current_fotw import get_current_fotw
+from event_routes.get_past_events import get_past_events
 from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
 from admin_routes.login_handler import login_protocol
-from event_routes.get_recent_events import get_recent_events
+from event_routes.get_event_overview import get_event_overview
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000 \
@@ -79,6 +80,10 @@ def get_members_route(year):
 def get_current_fotw_route():
     return get_current_fotw(fot)
 
+@app.route("/past-events", methods=["GET"])
+def get_past_events_route():
+    return get_past_events(events)
+
 @app.route('/reigning-foty', methods=['GET'])
 def get_reigning_foty_route():
     return get_reigning_foty(fot)
@@ -87,9 +92,9 @@ def get_reigning_foty_route():
 def get_reigning_fotm_route():
     return get_reigning_fotm(fot)
 
-@app.route("/recent-events", methods=["GET"])
-def get_recent_events_route():
-    return get_recent_events(events)
+@app.route("/event-overview", methods=["GET"])
+def get_event_overview_route():
+    return get_event_overview(events)
 
 @app.route("/semester/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
