@@ -1,17 +1,21 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
-import boto3
 from get_event_details import get_details
-from get_shoot import get_shoot
-from get_members import get_members
-from current_fotw import current_fotw
-from reigningFOT import reigning_foty, reigning_fotm
+from event_routes.get_shoot import get_shoot
+from member_routes.get_members import get_members
+from event_routes.get_semester import get_semester
+from event_routes.get_current_fotw import get_current_fotw
+from event_routes.get_past_events import get_past_events
+from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
 from get_event_details import get_details
+from admin_routes.login_handler import login_protocol
+from event_routes.get_event_overview import get_event_overview
 
 # client will error if a connection isn't made within 5 seconds of its first request
-SERVER_TIMEOUT = 5000 
+SERVER_TIMEOUT = 5000 \
 
 # Initialize flask application
 app = Flask(__name__)
@@ -22,12 +26,14 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 # Initialize mongodb databases and collections
 client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
 eventsDB = client['eventDB']
-fotDB = client['fotDB']
 memberDB = client['memberDB']
-shoots = eventsDB['shoot']
+
 events = eventsDB['events']
-fot = fotDB['fot']
-member = memberDB['member']
+member = memberDB['members']
+admin = memberDB['admins']
+
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
+jwt = JWTManager(app)
  
 @app.after_request
 # Globally modify response headers before requests
@@ -40,7 +46,6 @@ def add_header(response):
 @app.route("/")
 def root():
     return "Welcome to Needle!"
-
 
 @app.route("/health")
 def health_check():
@@ -59,30 +64,47 @@ def health_check():
 
     return jsonify(res), http_status_code
 
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    return login_protocol(username, password, member, admin)
 
-@app.route("/api/shoot/<shoot_id>", methods=["GET"])
+@app.route("/shoot/<shoot_id>", methods=["GET"])
 def get_shoot_route(shoot_id):
     return get_shoot(shoots, shoot_id)
 
-@app.route("/api/member/<year>", methods=["GET"])
+@app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
     return get_members(member, year)
 
-@app.route("/api/event/current_fotw", methods=["GET"])
-def get_current_fotw():
-    return current_fotw(fot)
+@app.route("/current-fotw", methods=["GET"])
+def get_current_fotw_route():
+    return get_current_fotw(fot)
 
-@app.route('/api/fot/reigningFOTY', methods=['GET'])
-def get_reigning_fotY():
-    return reigning_foty(fot)
+@app.route("/past-events", methods=["GET"])
+def get_past_events_route():
+    return get_past_events(events)
 
-@app.route('/api/fot/reigningFOTM', methods=['GET'])
-def get_reigning_fotM():
-    return reigning_fotm(fot)
+@app.route('/reigning-foty', methods=['GET'])
+def get_reigning_foty_route():
+    return get_reigning_foty(fot)
 
-@app.route("/api/events/details/<event_id>")
-def get_event_details(event_id):
-    return get_details(events, event_id)
+@app.route('/reigning-fotm', methods=['GET'])
+def get_reigning_fotm_route():
+    return get_reigning_fotm(fot)
+
+@app.route("/event-overview", methods=["GET"])
+def get_event_overview_route():
+    return get_event_overview(events)
+
+@app.route("/semester/<semester_id>", methods=["GET"])
+def get_semester_route(semester_id):
+    return get_semester(events, semester_id)
+
+@app.route("/event/<event_id>", methods=["GET"])
+def get_event_route(event_id):
+    return get_event(events, event_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
