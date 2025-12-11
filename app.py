@@ -3,14 +3,12 @@ from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
-from get_event_details import get_details
-from event_routes.get_shoot import get_shoot
+from event_routes.get_event import get_event
 from member_routes.get_members import get_members
 from event_routes.get_semester import get_semester
 from event_routes.get_current_fotw import get_current_fotw
 from event_routes.get_past_events import get_past_events
 from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
-from get_event_details import get_details
 from admin_routes.login_handler import login_protocol
 from event_routes.get_event_overview import get_event_overview
 
@@ -70,9 +68,9 @@ def login():
     password = request.json.get('password', None)
     return login_protocol(username, password, member, admin)
 
-@app.route("/shoot/<shoot_id>", methods=["GET"])
-def get_shoot_route(shoot_id):
-    return get_shoot(shoots, shoot_id)
+@app.route("/event/<event_id>", methods=["GET"])
+def get_event_route(event_id):
+    return get_event(events, event_id)
 
 @app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
@@ -101,10 +99,6 @@ def get_event_overview_route():
 @app.route("/semester/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
     return get_semester(events, semester_id)
-
-@app.route("/event/<event_id>", methods=["GET"])
-def get_event_route(event_id):
-    return get_event(events, event_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
