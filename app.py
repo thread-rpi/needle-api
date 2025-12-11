@@ -80,7 +80,7 @@ def get_members_route(year):
 def get_current_fotw_route():
     return get_current_fotw(fot)
 
-@app.route("past-events", methods=["GET"])
+@app.route("/past-events", methods=["GET"])
 def get_past_events_route():
     return get_past_events(events)
 
