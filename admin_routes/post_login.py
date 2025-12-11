@@ -1,7 +1,8 @@
 from flask import jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
+from datetime import timedelta
 
-def login_protocol(username, password, members, admin):
+def login_protocol(username, password, members, admin, TOKEN_EXPIRATION_TIME):
     # check that username and password successfully received from the request
     if username == None or password == None:
         return jsonify({"error": "Username or Password not found in request."}), 500
@@ -21,9 +22,22 @@ def login_protocol(username, password, members, admin):
             # if given password doesn't match the database, return error
             if password != password_check["password"]:
                 return jsonify({"error": "Credentials could not be authenticated."}), 401
-            # otherwise create an access token and return it in a JSON response
+            # otherwise create access and refresh tokens (both expire after 24 hours) and return them
             else:
-                return jsonify({"data": {"token": create_access_token(identity = username)}}), 200
+                access_token = create_access_token(
+                    identity=username,
+                    expires_delta=timedelta(hours=TOKEN_EXPIRATION_TIME)
+                )
+                refresh_token = create_refresh_token(
+                    identity=username,
+                    expires_delta=timedelta(hours=TOKEN_EXPIRATION_TIME)
+                )
+                return jsonify({
+                    "data": {
+                        "access_token": access_token,
+                        "refresh_token": refresh_token
+                    }
+                }), 200
         # if no such user exists in admin, return error
         else:
             return jsonify({"error": "Member is not authorized to access this page."}), 403

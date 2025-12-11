@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
@@ -9,11 +9,13 @@ from event_routes.get_semester import get_semester
 from event_routes.get_current_fotw import get_current_fotw
 from event_routes.get_past_events import get_past_events
 from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
-from admin_routes.login_handler import login_protocol
+from admin_routes.post_login import login_protocol
+from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
 
 # client will error if a connection isn't made within 5 seconds of its first request
-SERVER_TIMEOUT = 5000 \
+SERVER_TIMEOUT = 5000
+TOKEN_EXPIRATION_TIME = 24 # hours
 
 # Initialize flask application
 app = Flask(__name__)
@@ -62,11 +64,16 @@ def health_check():
 
     return jsonify(res), http_status_code
 
-@app.route("/login", methods=["POST"])
+@app.route("/auth/login", methods=["POST"])
 def login():
     username = request.json.get('username', None)
     password = request.json.get('password', None)
-    return login_protocol(username, password, member, admin)
+    return login_protocol(username, password, member, admin, TOKEN_EXPIRATION_TIME)
+
+@app.route("/auth/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    return refresh_token(TOKEN_EXPIRATION_TIME)
 
 @app.route("/event/<event_id>", methods=["GET"])
 def get_event_route(event_id):
