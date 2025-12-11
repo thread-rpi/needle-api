@@ -3,6 +3,8 @@ from flask_jwt_extended import JWTManager, jwt_required
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
+from flask_cors import CORS
+from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
 from member_routes.get_members import get_members
 from event_routes.get_semester import get_semester
@@ -34,13 +36,8 @@ admin = memberDB['admins']
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
- 
-@app.after_request
-# Globally modify response headers before requests
-def add_header(response):
-    # Allowing resource access to URIs specified in .env
-    response.headers['Access-Control-Allow-Origin'] = os.getenv('ACAO_URI') if os.getenv('ACAO_URI') else '*'
-    return response
+
+CORS(app, origins=["http://localhost:5173", "http://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
 
 # Routes
 @app.route("/")
@@ -66,7 +63,7 @@ def health_check():
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-    username = request.json.get('username', None)
+    username = request.json.get('email', None)
     password = request.json.get('password', None)
     return login_protocol(username, password, member, admin, TOKEN_EXPIRATION_TIME)
 
@@ -74,6 +71,11 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     return refresh_token(TOKEN_EXPIRATION_TIME)
+
+@app.route("/auth/me", methods=["GET"])
+@jwt_required()
+def get_me_route():
+    return get_me(member)
 
 @app.route("/event/<event_id>", methods=["GET"])
 def get_event_route(event_id):

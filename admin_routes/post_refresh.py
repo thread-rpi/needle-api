@@ -2,8 +2,6 @@ from flask import jsonify
 from flask_jwt_extended import get_jwt_identity, create_access_token
 from datetime import timedelta
 
-
-
 def refresh_token(TOKEN_EXPIRATION_TIME):
     """
     Refresh endpoint to get a new access token using a valid refresh token.
