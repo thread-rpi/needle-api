@@ -37,7 +37,7 @@ admin = memberDB['admins']
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
 
-CORS(app, origins=["http://localhost:5173", "http://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
+CORS(app, origins=["http://localhost:5173", "https://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
 
 # Routes
 @app.route("/")
