@@ -21,7 +21,9 @@ def get_past_events(events):
 
     # return a JSON response
     return jsonify({
-        "data": events_list
+        "data": {
+          "past_events": events_list
+        }
     }), 200
 
    

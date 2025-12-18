@@ -65,7 +65,9 @@ def get_semester(events, semester_id):
                     event['date'] = event['date'].isoformat()
 
             return jsonify({
-                "data" : events
+                "data" : {
+                  "semester_events": events
+                }
             }), 200
         else:
             # otherwise, jsonfiy a message saying no events

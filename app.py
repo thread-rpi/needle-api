@@ -46,7 +46,7 @@ def root():
 
 @app.route("/health")
 def health_check():
-    res = {"data": "healthy"}
+    res = {"data": { "state": "healthy" }}
     http_status_code = 200
 
     # DB connection checks
