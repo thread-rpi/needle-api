@@ -8,7 +8,8 @@ def get_past_events(events):
     try:
         # get 20 most recent events
         events_list = list(events.find({
-            "date": {"$lte": current}
+            "date": {"$lte": current},
+            "type": {"$ne": "fot"}
         }).sort("date", DESCENDING).limit(20))
     
     except Exception as e:
