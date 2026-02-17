@@ -26,6 +26,9 @@ def get_past_events(events):
 
     # serialize the events
     events_list = serialize_mongo_doc(events_list)
+    # expose _id as id for response clarity
+    for event in events_list:
+        event["id"] = event.pop("_id")
 
     # return a JSON response
     return jsonify({
