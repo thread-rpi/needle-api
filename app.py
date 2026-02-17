@@ -61,6 +61,7 @@ def health_check():
 
     return jsonify(res), http_status_code
 
+# Authentication routes
 @app.route("/auth/login", methods=["POST"])
 def login():
     username = request.json.get('email', None)
@@ -77,37 +78,40 @@ def refresh():
 def get_me_route():
     return get_me(member)
 
-@app.route("/event/<event_id>", methods=["GET"])
+# Events (events collection)
+@app.route("/events/<event_id>", methods=["GET"])
 def get_event_route(event_id):
     return get_event(events, event_id)
 
+@app.route("/events/past", methods=["GET"])
+def get_past_events_route():
+    return get_past_events(events)
+
+@app.route("/events/overview", methods=["GET"])
+def get_event_overview_route():
+    return get_event_overview(events)
+
+@app.route("/events/semester/<semester_id>", methods=["GET"])
+def get_semester_route(semester_id):
+    return get_semester(events, semester_id)
+
+# Members (members collection)
 @app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
     return get_members(member, year)
 
-@app.route("/current-fotw", methods=["GET"])
+# FOT (fot collection)
+@app.route("/fot/current-fotw", methods=["GET"])
 def get_current_fotw_route():
     return get_current_fotw(fot)
 
-@app.route("/past-events", methods=["GET"])
-def get_past_events_route():
-    return get_past_events(events)
-
-@app.route('/reigning-foty', methods=['GET'])
+@app.route("/fot/reigning-foty", methods=["GET"])
 def get_reigning_foty_route():
     return get_reigning_foty(fot)
 
-@app.route('/reigning-fotm', methods=['GET'])
+@app.route("/fot/reigning-fotm", methods=["GET"])
 def get_reigning_fotm_route():
     return get_reigning_fotm(fot)
-
-@app.route("/event-overview", methods=["GET"])
-def get_event_overview_route():
-    return get_event_overview(events)
-
-@app.route("/semester/<semester_id>", methods=["GET"])
-def get_semester_route(semester_id):
-    return get_semester(events, semester_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
