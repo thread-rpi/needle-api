@@ -5,12 +5,19 @@ from event_routes.event_helpers import serialize_mongo_doc
 
 def get_past_events(events):
     current = datetime.now(timezone.utc)
+    current_iso = current.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     try:
-        # get 20 most recent events
+        # return only necessary fields
+        projection = {"_id": 1, "title": 1, "date": 1, "type": 1, "cover_image_path": 1}
+        # filter for past, non-fotw, published only events
         events_list = list(events.find({
-            "date": {"$lte": current},
-            "type": {"$ne": "fot"}
-        }).sort("date", DESCENDING).limit(20))
+            "$or": [
+                {"date": {"$lte": current}},
+                {"date": {"$lte": current_iso}}
+            ],
+            "type": {"$ne": "fotw"},
+            "published": True
+        }, projection).sort("date", DESCENDING).limit(20))
     
     except Exception as e:
       return jsonify({
