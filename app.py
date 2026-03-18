@@ -8,9 +8,7 @@ from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
 from member_routes.get_members import get_members
 from event_routes.get_semester import get_semester
-from event_routes.get_current_fotw import get_current_fotw
 from event_routes.get_past_events import get_past_events
-from event_routes.get_reigning_fot import get_reigning_foty, get_reigning_fotm
 from admin_routes.post_login import login_protocol
 from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
@@ -99,19 +97,6 @@ def get_semester_route(semester_id):
 @app.route("/members/<year>", methods=["GET"])
 def get_members_route(year):
     return get_members(member, year)
-
-# FOT (fot collection)
-@app.route("/fot/current-fotw", methods=["GET"])
-def get_current_fotw_route():
-    return get_current_fotw(fot)
-
-@app.route("/fot/reigning-foty", methods=["GET"])
-def get_reigning_foty_route():
-    return get_reigning_foty(fot)
-
-@app.route("/fot/reigning-fotm", methods=["GET"])
-def get_reigning_fotm_route():
-    return get_reigning_fotm(fot)
 
 if __name__ == "__main__":
     app.run(debug=True)
