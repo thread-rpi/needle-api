@@ -8,7 +8,15 @@ def get_past_events(events):
     current_iso = current.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     try:
         # return only necessary fields
-        projection = {"_id": 1, "title": 1, "date": 1, "location": 1, "type": 1, "cover_image_path": 1}
+        projection = {
+            "_id": 1,
+            "title": 1,
+            "date": 1,
+            "location": 1,
+            "type": 1,
+            "image_path": 1,
+            "cover_image_path": 1
+        }
         # filter for past, non-fotw, published only events
         events_list = list(events.find({
             "$or": [
@@ -29,6 +37,11 @@ def get_past_events(events):
     # expose _id as id for response clarity
     for event in events_list:
         event["id"] = event.pop("_id")
+        # Transitional compatibility during schema migration.
+        image_path = event.get("image_path") or event.get("cover_image_path")
+        if image_path is not None:
+            event["image_path"] = image_path
+            event["cover_image_path"] = image_path
 
     # return a JSON response
     return jsonify({

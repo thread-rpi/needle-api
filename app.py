@@ -4,6 +4,7 @@ import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from flask_cors import CORS
+import certifi
 from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
 from member_routes.get_members import get_members
@@ -24,7 +25,12 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 # Initialize mongodb databases and collections
-client = pymongo.MongoClient(app.config['MONGO_URI'], serverSelectionTimeoutMS=SERVER_TIMEOUT)
+client = pymongo.MongoClient(
+    app.config['MONGO_URI'],
+    serverSelectionTimeoutMS=SERVER_TIMEOUT,
+    tls=True,
+    tlsCAFile=certifi.where(),
+)
 eventsDB = client['eventDB']
 memberDB = client['memberDB']
 
