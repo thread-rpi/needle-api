@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_jwt_extended import JWTManager, jwt_required
 import pymongo
 from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from flask_cors import CORS
 import certifi
+from flask_swagger_ui import get_swaggerui_blueprint
 from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
 from member_routes.get_members import get_members
@@ -43,6 +44,40 @@ jwt = JWTManager(app)
 
 CORS(app, origins=["http://localhost:5173", "https://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_OPENAPI_FILE = "docs/openapi.yaml"
+CURRENT_OPENAPI_FILE = "docs/openapi-internal.yaml"
+POST_MIGRATION_OPENAPI_FILE = "docs/openapi-internal-post-migration.yaml"
+ENABLE_INTERNAL_API_DOCS = os.getenv("ENABLE_INTERNAL_API_DOCS", "false").lower() == "true"
+
+# Swagger UI for the public API contract
+public_swagger_bp = get_swaggerui_blueprint(
+    "/docs",
+    "/docs/openapi.yaml",
+    config={"app_name": "Needle Thread API"},
+    blueprint_name="swagger_ui_public",
+)
+app.register_blueprint(public_swagger_bp, url_prefix="/docs")
+
+if ENABLE_INTERNAL_API_DOCS:
+    # Internal Swagger UI for the current/live API contract
+    current_swagger_bp = get_swaggerui_blueprint(
+        "/docs-internal",
+        "/docs/openapi-internal.yaml",
+        config={"app_name": "Needle Thread API - Current (Internal)"},
+        blueprint_name="swagger_ui_internal_current",
+    )
+    app.register_blueprint(current_swagger_bp, url_prefix="/docs-internal")
+
+    # Internal Swagger UI for the post-migration target API contract
+    post_migration_swagger_bp = get_swaggerui_blueprint(
+        "/docs-internal-post-migration",
+        "/docs/openapi-internal-post-migration.yaml",
+        config={"app_name": "Needle Thread API - Post Migration (Internal)"},
+        blueprint_name="swagger_ui_internal_post_migration",
+    )
+    app.register_blueprint(post_migration_swagger_bp, url_prefix="/docs-internal-post-migration")
+
 # Routes
 @app.route("/")
 def root():
@@ -64,6 +99,22 @@ def health_check():
         http_status_code = 500
 
     return jsonify(res), http_status_code
+
+@app.route("/docs/openapi-internal.yaml", methods=["GET"])
+def get_openapi_current():
+    if not ENABLE_INTERNAL_API_DOCS:
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(BASE_DIR, CURRENT_OPENAPI_FILE, mimetype="application/yaml")
+
+@app.route("/docs/openapi-internal-post-migration.yaml", methods=["GET"])
+def get_openapi_post_migration():
+    if not ENABLE_INTERNAL_API_DOCS:
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(BASE_DIR, POST_MIGRATION_OPENAPI_FILE, mimetype="application/yaml")
+
+@app.route("/docs/openapi.yaml", methods=["GET"])
+def get_openapi_public():
+    return send_from_directory(BASE_DIR, PUBLIC_OPENAPI_FILE, mimetype="application/yaml")
 
 # Authentication routes
 @app.route("/auth/login", methods=["POST"])

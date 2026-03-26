@@ -44,3 +44,7 @@ __pycache__/
 
 # vscode
 .vscode/
+
+# Internal API specs (do not publish from OSS repo)
+openapi-internal.yaml
+openapi-internal-post-migration.yaml
