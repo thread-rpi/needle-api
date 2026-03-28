@@ -42,8 +42,8 @@ def create_event_endpoint(events, members, admin):
             return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
         # Optional Fields Mapping
-        s3_path = data.get("s3_path", "")
-        if not isinstance(s3_path, str): s3_path = ""
+        image_path = data.get("image_path")
+        if not isinstance(image_path, str): image_path = ""
         
         blurb = data.get("blurb", "")
         if not isinstance(blurb, str): blurb = ""
@@ -94,28 +94,28 @@ def create_event_endpoint(events, members, admin):
                     return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
         # Automatic Fields
-        now = datetime.utcnow()
+        now_str = datetime.utcnow().isoformat()
         new_event = {
             "_id": ObjectId(),
             "title": data["title"],
-            "date": event_date,
+            "date": event_date.isoformat(),
             "location": data["location"],
             "type": data["type"],
-            "s3_path": s3_path,
+            "image_path": image_path,
             "blurb": blurb,
             "image_ids": image_ids,
             "published": published,
             "photographer_ids": photographer_ids,
             "creative_director_ids": creative_director_ids,
             "model_ids": model_ids,
-            "created_at": now,
-            "updated_at": now,
+            "created_at": now_str,
+            "updated_at": now_str,
             "created_by": user["_id"],
-            "updated_by": user["_id"]
+            "updated_by": user["_id"],
+            "deleted_at": None,
+            "deleted_by": None,
+            "additional_personnel": additional_personnel
         }
-        
-        if additional_personnel or "additional_personnel" in data:
-            new_event["additional_personnel"] = additional_personnel
 
         # Database Operation
         events.insert_one(new_event)
@@ -123,4 +123,11 @@ def create_event_endpoint(events, members, admin):
         return jsonify({"data": {"id": str(new_event["_id"])}}), 200
 
     except Exception as e:
-        return jsonify({"error": "Something went wrong internally"}), 500
+        import traceback
+        trace_str = traceback.format_exc()
+        print(trace_str)
+        return jsonify({
+            "error": "Something went wrong internally",
+            "details": str(e),
+            "traceback": trace_str
+        }), 500
