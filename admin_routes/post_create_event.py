@@ -25,36 +25,43 @@ def create_event_endpoint(events, members, admin):
         if not data:
             return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
-        required_fields = ["title", "date", "location", "type"]
+        required_fields = ["title", "date", "location", "type", "blurb", "published"]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
-        if not isinstance(data["title"], str) or not isinstance(data["location"], str) or not isinstance(data["type"], str):
+        # Type validation for required string fields
+        if not isinstance(data["title"], str) or not isinstance(data["location"], str) or \
+           not isinstance(data["type"], str) or not isinstance(data["blurb"], str):
             return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
+        # Type validation for published (must be boolean)
+        if not isinstance(data["published"], bool):
+            return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
+
+        # Validate event type enum
         if data["type"] not in ['shoot', 'internal', 'external', 'fotw']:
             return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
+        # Parse and validate date
         try:
             event_date = dateutil.parser.isoparse(str(data["date"]))
         except (ValueError, TypeError):
             return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
-        # Optional Fields Mapping
-        image_path = data.get("image_path")
-        if not isinstance(image_path, str): image_path = ""
-        
-        blurb = data.get("blurb", "")
-        if not isinstance(blurb, str): blurb = ""
-        
-        published = data.get("published", False)
-        if not isinstance(published, bool): published = False
+        # Optional Fields Processing
+        optional_fields_to_add = {}
+
+        if "image_path" in data:
+            image_path = data["image_path"]
+            if image_path is not None and not isinstance(image_path, str):
+                return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
+            optional_fields_to_add["image_path"] = image_path
 
         # Array parsing function
         def parse_object_id_array(array_data):
             if not isinstance(array_data, list):
-                return []
+                raise ValueError
             parsed = []
             for item in array_data:
                 try:
@@ -63,25 +70,24 @@ def create_event_endpoint(events, members, admin):
                     raise ValueError
             return parsed
 
-        try:
-            image_ids = parse_object_id_array(data.get("image_ids", []))
-            photographer_ids = parse_object_id_array(data.get("photographer_ids", []))
-            creative_director_ids = parse_object_id_array(data.get("creative_director_ids", []))
-            model_ids = parse_object_id_array(data.get("model_ids", []))
-        except ValueError:
-            return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
+        for array_field in ["image_ids", "photographer_ids", "creative_director_ids", "model_ids"]:
+            if array_field in data:
+                try:
+                    optional_fields_to_add[array_field] = parse_object_id_array(data[array_field])
+                except ValueError:
+                    return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
         # Additional personnel parsing
-        additional_personnel = []
         if "additional_personnel" in data:
             raw_additional = data["additional_personnel"]
             if not isinstance(raw_additional, list):
                 return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
+            additional_personnel = []
             for item in raw_additional:
                 if not isinstance(item, dict) or "member_id" not in item or "role" not in item:
                     return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
-                
+
                 if not isinstance(item["role"], str):
                     return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
 
@@ -92,42 +98,34 @@ def create_event_endpoint(events, members, admin):
                     })
                 except (InvalidId, TypeError):
                     return jsonify({"error": "Required fields are missing or malformed fields are present"}), 400
+            
+            optional_fields_to_add["additional_personnel"] = additional_personnel
 
         # Automatic Fields
-        now_str = datetime.utcnow().isoformat()
+        now = datetime.utcnow()
         new_event = {
             "_id": ObjectId(),
             "title": data["title"],
-            "date": event_date.isoformat(),
+            "date": event_date,
             "location": data["location"],
             "type": data["type"],
-            "image_path": image_path,
-            "blurb": blurb,
-            "image_ids": image_ids,
-            "published": published,
-            "photographer_ids": photographer_ids,
-            "creative_director_ids": creative_director_ids,
-            "model_ids": model_ids,
-            "created_at": now_str,
-            "updated_at": now_str,
+            "blurb": data["blurb"],
+            "published": data["published"],
+            "created_at": now,
+            "updated_at": now,
             "created_by": user["_id"],
-            "updated_by": user["_id"],
-            "deleted_at": None,
-            "deleted_by": None,
-            "additional_personnel": additional_personnel
+            "updated_by": user["_id"]
         }
+        
+        # Add optional fields only if they were present in the request
+        new_event.update(optional_fields_to_add)
 
         # Database Operation
         events.insert_one(new_event)
-        
+
         return jsonify({"data": {"id": str(new_event["_id"])}}), 200
 
     except Exception as e:
         import traceback
-        trace_str = traceback.format_exc()
-        print(trace_str)
-        return jsonify({
-            "error": "Something went wrong internally",
-            "details": str(e),
-            "traceback": trace_str
-        }), 500
+        print(traceback.format_exc())
+        return jsonify({"error": "Something went wrong internally"}), 500
