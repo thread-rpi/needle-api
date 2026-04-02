@@ -14,7 +14,10 @@ def get_event(events, event_id):
 
     # Search for event of corresponding id
     try:
-        event = events.find_one({"_id": obj_id})
+        event = events.find_one({
+            "_id": obj_id, 
+            "published": True
+        })
     except Exception as e:
         # Something went wrong with the database query
         return jsonify({"error": "Failed to find event of id(" + event_id + "): " + str(e)}), 500
