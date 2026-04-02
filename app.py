@@ -17,7 +17,8 @@ from event_routes.get_event_overview import get_event_overview
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000
-TOKEN_EXPIRATION_TIME = 24 # hours
+ACCESS_TOKEN_EXPIRATION_TIME = 24 # hours
+REFRESH_TOKEN_EXPIRATION_TIME = 4 # weeks
 
 # Initialize flask application
 app = Flask(__name__)
@@ -121,12 +122,12 @@ def get_openapi_public():
 def login():
     username = request.json.get('email', None)
     password = request.json.get('password', None)
-    return login_protocol(username, password, member, admin, TOKEN_EXPIRATION_TIME)
+    return login_protocol(username, password, member, admin, ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_EXPIRATION_TIME)
 
 @app.route("/auth/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
-    return refresh_token(TOKEN_EXPIRATION_TIME)
+    return refresh_token(ACCESS_TOKEN_EXPIRATION_TIME)
 
 @app.route("/auth/me", methods=["GET"])
 @jwt_required()
