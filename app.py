@@ -13,6 +13,7 @@ from admin_routes.post_login import login_protocol
 from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
 from admin_routes.post_create_event import create_event_endpoint
+from admin_routes.put_update_event import update_event_endpoint
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000
@@ -81,6 +82,11 @@ def get_me_route():
 @jwt_required(optional=True)
 def create_event_route():
     return create_event_endpoint(events, member, admin)
+
+@app.route("/admin/update-event", methods=["PUT"])
+@jwt_required(optional=True)
+def update_event_route():
+    return update_event_endpoint(events, member, admin)
 
 # Events (events collection)
 @app.route("/events/<event_id>", methods=["GET"])
