@@ -5,6 +5,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from flask_cors import CORS
 import certifi
+from dotenv import load_dotenv
 from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
 from member_routes.get_members import get_members
@@ -13,6 +14,9 @@ from event_routes.get_past_events import get_past_events
 from admin_routes.post_login import login_protocol
 from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
+from admin_routes.post_upload_image import upload_image_endpoint
+
+load_dotenv()
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000
@@ -35,6 +39,7 @@ eventsDB = client['eventDB']
 memberDB = client['memberDB']
 
 events = eventsDB['events']
+images = eventsDB['images']
 member = memberDB['members']
 admin = memberDB['admins']
 
@@ -81,6 +86,12 @@ def refresh():
 @jwt_required()
 def get_me_route():
     return get_me(member)
+
+# Admin
+@app.route("/admin/upload-image", methods=["POST"])
+@jwt_required()
+def upload_image_route():
+    return upload_image_endpoint(events=events, images=images, members=member, admins=admin)
 
 # Events (events collection)
 @app.route("/events/<event_id>", methods=["GET"])
