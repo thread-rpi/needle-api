@@ -1,6 +1,6 @@
 from flask import jsonify
 from datetime import datetime, timezone
-from event_routes.event_helpers import serialize_mongo_doc
+from helpers.serialize import serialize_mongo_doc
 
 def get_event_overview(events_collection):
   '''

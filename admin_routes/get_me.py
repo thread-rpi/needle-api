@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
-from event_routes.event_helpers import serialize_mongo_doc
+from helpers.serialize import serialize_mongo_doc
 
 def get_me(members):
     try:
