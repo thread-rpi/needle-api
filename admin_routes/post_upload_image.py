@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import boto3
 from bson import ObjectId
 from dateutil.parser import isoparse
-from flask import jsonify, request
+from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 
 from PIL import Image, ImageFilter
@@ -19,7 +19,7 @@ def _error(message: str, status_code: int):
     return jsonify({"error": message}), status_code
 
 
-def _parse_bool(value, default=False):
+def _parse_bool(value, default=False, *, strict=False):
     if value is None:
         return default
     if isinstance(value, bool):
@@ -29,6 +29,8 @@ def _parse_bool(value, default=False):
         return True
     if s in {"false", "0", "no", "n", "off"}:
         return False
+    if strict and str(value).strip() != "":
+        raise ValueError("invalid boolean")
     return default
 
 
@@ -58,6 +60,13 @@ def _normalize_prefix(prefix: str) -> str:
     if p == "":
         return ""
     return p if p.endswith("/") else (p + "/")
+
+
+def _iso_utc(dt: datetime) -> str:
+    """MongoDB jsonSchema on this project expects datetimes as ISO strings, not BSON date."""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).isoformat()
 
 
 def _generate_avif_variants(jpeg_bytes: bytes):
@@ -156,24 +165,54 @@ def upload_image_endpoint(*, events, images, members, admins):
     except Exception:
         return _error("Required fields are missing, malformed, or inaccurate fields are present", 400)
 
-    # Optional fields with defaults
-    caption = request.form.get("caption", "")
-    if caption is None:
-        caption = ""
-    caption = str(caption)
+    # Fields required by imageDB.images $jsonSchema (always present on insert)
+    caption_raw = request.form.get("caption")
+    caption = str(caption_raw).strip() if caption_raw is not None else ""
 
-    published = _parse_bool(request.form.get("published"), default=False)
+    published_raw = request.form.get("published")
+    if published_raw is not None:
+        try:
+            published = _parse_bool(published_raw, default=False, strict=True)
+        except ValueError:
+            return _error(
+                "Required fields are missing, malformed, or inaccurate fields are present",
+                400,
+            )
+    else:
+        published = False
 
     try:
-        photographer_id = _parse_object_id(request.form.get("photographer_id"))
-        creative_director_id = _parse_object_id(request.form.get("creative_director_id"))
-        model_ids = _parse_object_id_list(request.form.get("model_ids"))
+        pid_form = request.form.get("photographer_id")
+        cd_form = request.form.get("creative_director_id")
+        if pid_form is None or str(pid_form).strip() == "":
+            return _error(
+                "Required fields are missing, malformed, or inaccurate fields are present",
+                400,
+            )
+        if cd_form is None or str(cd_form).strip() == "":
+            return _error(
+                "Required fields are missing, malformed, or inaccurate fields are present",
+                400,
+            )
+
+        photographer_id = _parse_object_id(pid_form)
+        creative_director_id = _parse_object_id(cd_form)
+
+        mid_form = request.form.get("model_ids")
+        model_ids = (
+            _parse_object_id_list(mid_form)
+            if mid_form is not None and str(mid_form).strip() != ""
+            else []
+        )
     except Exception:
-        return _error("Required fields are missing, malformed, or inaccurate fields are present", 400)
+        return _error(
+            "Required fields are missing, malformed, or inaccurate fields are present",
+            400,
+        )
 
     additional_personnel = []
     additional_personnel_raw = request.form.get("additional_personnel")
-    if additional_personnel_raw is not None:
+    if additional_personnel_raw is not None and str(additional_personnel_raw).strip() != "":
         try:
             parsed = json.loads(str(additional_personnel_raw))
             if not isinstance(parsed, list):
@@ -187,7 +226,10 @@ def upload_image_endpoint(*, events, images, members, admins):
                     raise ValueError("additional_personnel.member_id missing")
                 additional_personnel.append({"member_id": member_id, "role": str(role)})
         except Exception:
-            return _error("Required fields are missing, malformed, or inaccurate fields are present", 400)
+            return _error(
+                "Required fields are missing, malformed, or inaccurate fields are present",
+                400,
+            )
 
     # Event validation + retrieve image_path + image_ids
     event = events.find_one({"_id": event_obj_id})
@@ -210,11 +252,13 @@ def upload_image_endpoint(*, events, images, members, admins):
     try:
         variants, width, height = _generate_avif_variants(jpeg_bytes)
     except Exception:
+        current_app.logger.exception("upload-image: AVIF generation failed")
         return _error("Something went wrong with the image generation or upload", 500)
 
     # Upload to S3
     bucket = os.getenv("S3_BUCKET")
     if not bucket:
+        current_app.logger.error("upload-image: S3_BUCKET is not set in environment")
         return _error("Something went wrong internally", 500)
 
     s3 = boto3.client("s3")
@@ -228,26 +272,27 @@ def upload_image_endpoint(*, events, images, members, admins):
                 ExtraArgs={"ContentType": "image/avif"},
             )
     except Exception:
+        current_app.logger.exception("upload-image: S3 upload failed")
         return _error("Something went wrong with the image generation or upload", 500)
 
-    # DB operations
+    # DB operations — imageDB.images: match collection $jsonSchema (required keys + string datetimes).
     now = datetime.now(timezone.utc)
     new_image_id = ObjectId()
     image_doc = {
         "_id": new_image_id,
         "event_id": event_obj_id,
-        "date": taken_at,
+        "date": _iso_utc(taken_at),
+        "path": image_prefix,
         "caption": caption,
         "published": published,
-        "photographer_id": photographer_id or None,
-        "creative_director_id": creative_director_id or None,
-        "model_ids": model_ids or [],
-        "additional_personnel": additional_personnel or [],
-        "path": image_prefix,
         "width": int(width),
         "height": int(height),
-        "created_at": now,
-        "updated_at": now,
+        "photographer_id": photographer_id,
+        "creative_director_id": creative_director_id,
+        "model_ids": model_ids,
+        "additional_personnel": additional_personnel,
+        "created_at": _iso_utc(now),
+        "updated_at": _iso_utc(now),
         "created_by": user_id,
         "updated_by": user_id,
     }
@@ -262,6 +307,7 @@ def upload_image_endpoint(*, events, images, members, admins):
             },
         )
     except Exception:
+        current_app.logger.exception("upload-image: MongoDB insert or event update failed")
         return _error("Something went wrong internally", 500)
 
     return jsonify({"data": {"id": str(new_image_id)}}), 200

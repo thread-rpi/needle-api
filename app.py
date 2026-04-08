@@ -37,14 +37,31 @@ client = pymongo.MongoClient(
 )
 eventsDB = client['eventDB']
 memberDB = client['memberDB']
+imageDB = client['imageDB']
 
 events = eventsDB['events']
-images = eventsDB['images']
+images = imageDB['images']
 member = memberDB['members']
 admin = memberDB['admins']
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
+
+
+@jwt.unauthorized_loader
+def _jwt_unauthorized(_err):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
+
+@jwt.invalid_token_loader
+def _jwt_invalid(_err):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
+
+@jwt.expired_token_loader
+def _jwt_expired(_jwt_header, _jwt_payload):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
 
 CORS(app, origins=["http://localhost:5173", "https://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
 
