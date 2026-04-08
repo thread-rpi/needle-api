@@ -13,6 +13,7 @@ servers:
 tags:
   - name: System
   - name: Events
+  - name: Images
   - name: Members
 
 paths:
@@ -30,10 +31,30 @@ paths:
                 type: string
                 example: Welcome to Needle!
 
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service and DB are healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthSuccessResponse"
+        "500":
+          description: Service unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /events/{event_id}:
     get:
       tags: [Events]
       summary: Get event by id
+      description: Returns a published event document for the provided id.
       operationId: getEventById
       parameters:
         - name: event_id
@@ -128,6 +149,76 @@ paths:
                 $ref: "#/components/schemas/GetSemesterSuccessResponse"
         "400":
           description: Invalid semester code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /images/{image_id}:
+    get:
+      tags: [Images]
+      summary: Get image by id
+      operationId: getImageById
+      parameters:
+        - name: image_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+      responses:
+        "200":
+          description: Image found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetImageSuccessResponse"
+        "400":
+          description: Invalid image id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Image not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /members/{id}:
+    get:
+      tags: [Members]
+      summary: Get member by id
+      operationId: getMemberById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+      responses:
+        "200":
+          description: Member found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMemberSuccessResponse"
+        "400":
+          description: Invalid member id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Member not found
           content:
             application/json:
               schema:
@@ -244,6 +335,75 @@ components:
             $ref: "#/components/schemas/AdditionalPersonnelItem"
       additionalProperties: true
 
+    PublicImage:
+      type: object
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        date:
+          type: string
+          format: date-time
+        path:
+          type: string
+        caption:
+          type: string
+        published:
+          type: boolean
+        width:
+          type: integer
+        height:
+          type: integer
+        photographer_id:
+          type: string
+        creative_director_id:
+          type: string
+        model_ids:
+          type: array
+          items:
+            type: string
+        additional_personnel:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdditionalPersonnelItem"
+      additionalProperties: true
+
+    PublicMember:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        display_name:
+          type: string
+        pronouns:
+          type: string
+        role:
+          type: string
+        email:
+          type: string
+          format: email
+        links:
+          type: object
+          additionalProperties:
+            type: string
+        profile_photo_path:
+          type: string
+        blurb:
+          type: string
+        start_year:
+          type: integer
+        end_year:
+          type: integer
+          nullable: true
+        visibility:
+          type: string
+        active:
+          type: boolean
+      additionalProperties: true
+
     PastEventCard:
       type: object
       properties:
@@ -270,6 +430,20 @@ components:
           type: object
           allOf:
             - $ref: "#/components/schemas/PublicEvent"
+
+    GetImageSuccessResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PublicImage"
+
+    GetMemberSuccessResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PublicMember"
 
     GetPastEventsSuccessResponse:
       type: object
