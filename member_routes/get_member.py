@@ -22,7 +22,7 @@ def get_member(members, id):
     # If member exists return the data, if not return an error
     if member:
         # serialize the member doc
-        member = serialize_mongo_doc([member])
+        member = serialize_mongo_doc(member)
         # serialize the id field
         member = serialize_id(member)
         return jsonify({

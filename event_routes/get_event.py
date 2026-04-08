@@ -25,7 +25,7 @@ def get_event(events, event_id):
     # If event exists return the data, if not return an error
     if event:
         # serialize the event doc
-        event = serialize_mongo_doc([event])
+        event = serialize_mongo_doc(event)
         # serialize the id field
         event = serialize_id(event)
         return jsonify({

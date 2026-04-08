@@ -32,7 +32,7 @@ def get_past_events(events):
       }), 500
 
     # serialize the events
-    events_list = serialize_mongo_doc([events_list])
+    events_list = serialize_mongo_doc(events_list)
     # serialize the id field
     events_list = serialize_id(events_list)
 
