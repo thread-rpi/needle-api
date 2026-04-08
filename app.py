@@ -15,6 +15,7 @@ from admin_routes.post_login import login_protocol
 from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
 from member_routes.get_member import get_member
+from image_routes.get_image import get_image
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000
@@ -36,10 +37,12 @@ client = pymongo.MongoClient(
 )
 eventsDB = client['eventDB']
 memberDB = client['memberDB']
+imageDB = client['imageDB']
 
 events = eventsDB['events']
 member = memberDB['members']
 admin = memberDB['admins']
+images = imageDB['images']
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
@@ -151,6 +154,11 @@ def get_event_overview_route():
 @app.route("/events/semester/<semester_id>", methods=["GET"])
 def get_semester_route(semester_id):
     return get_semester(events, semester_id)
+
+# Images (images collection)
+@app.route("/images/<image_id>", methods=["GET"])
+def get_image_route(image_id):
+    return get_image(images, image_id)
 
 # Members (members collection)
 @app.route("/members/<id>", methods=["GET"])
