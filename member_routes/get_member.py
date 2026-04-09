@@ -4,7 +4,8 @@ from helpers.serialize import serialize_mongo_doc, serialize_id
 
 # members: MongoDB member collection
 # id: string representing a member id
-# returns member data of member corresponding to id
+# returns member data of member corresponding to id if visible
+# otherwise returns an error
 def get_member(members, id):
     # Check if id is a valid format
     try:
@@ -14,7 +15,7 @@ def get_member(members, id):
 
     # Search for member of corresponding id
     try:
-        member = members.find_one({"_id": obj_id})
+        member = members.find_one({"_id": obj_id, "visible": True})
     except Exception as e:
         # Something went wrong with the database query
         return jsonify({"error": "Failed to find member of id (" + id + "): " + str(e)}), 500

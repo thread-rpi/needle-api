@@ -4,7 +4,8 @@ from helpers.serialize import serialize_mongo_doc, serialize_id
 
 # images: MongoDB image collection
 # id: string representing a image id
-# returns image data of image corresponding to id
+# returns image data of image corresponding to id if published
+# otherwise returns an error
 def get_image(images, id):
     # Check if id is a valid format
     try:
@@ -14,7 +15,7 @@ def get_image(images, id):
 
     # Search for image of corresponding id
     try:
-        image = images.find_one({"_id": obj_id})
+        image = images.find_one({"_id": obj_id, "published": True})
     except Exception as e:
         # Something went wrong with the database query
         return jsonify({"error": "Failed to find image of id (" + id + "): " + str(e)}), 500
