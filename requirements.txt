@@ -7,3 +7,7 @@ certifi==2026.2.25
 python-dotenv==1.1.1
 flask-swagger-ui==5.21.0
 gunicorn==23.0.0
+boto3==1.40.22
+Pillow==11.3.0
+pillow-avif-plugin==1.5.5
+python-dateutil==2.9.0.post0

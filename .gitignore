@@ -41,6 +41,7 @@ venv/
 # python
 __pycache__
 __pycache__/
+.pytest_cache/
 
 # vscode
 .vscode/
@@ -48,3 +49,8 @@ __pycache__/
 # Internal API specs (do not publish from OSS repo)
 openapi-internal.yaml
 openapi-internal-post-migration.yaml
+
+# Root-level venv artifacts (if a venv was created in repo root)
+/bin/
+/lib/
+/pyvenv.cfg

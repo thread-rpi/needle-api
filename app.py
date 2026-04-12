@@ -5,6 +5,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 import os
 from flask_cors import CORS
 import certifi
+from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
 from admin_routes.get_me import get_me
 from event_routes.get_event import get_event
@@ -14,8 +15,11 @@ from event_routes.get_past_events import get_past_events
 from admin_routes.post_login import login_protocol
 from admin_routes.post_refresh import refresh_token
 from event_routes.get_event_overview import get_event_overview
+from admin_routes.post_upload_image import upload_image_endpoint
 from member_routes.get_member import get_member
 from image_routes.get_image import get_image
+
+load_dotenv()
 
 # client will error if a connection isn't made within 5 seconds of its first request
 SERVER_TIMEOUT = 5000
@@ -40,12 +44,28 @@ memberDB = client['memberDB']
 imageDB = client['imageDB']
 
 events = eventsDB['events']
+images = imageDB['images']
 member = memberDB['members']
 admin = memberDB['admins']
-images = imageDB['images']
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
 jwt = JWTManager(app)
+
+
+@jwt.unauthorized_loader
+def _jwt_unauthorized(_err):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
+
+@jwt.invalid_token_loader
+def _jwt_invalid(_err):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
+
+@jwt.expired_token_loader
+def _jwt_expired(_jwt_header, _jwt_payload):
+    return jsonify({"error": "Unauthenticated or unauthorized request"}), 403
+
 
 CORS(app, origins=["http://localhost:5173", "https://needle-ui.vercel.app"], allow_headers=['Content-Type', 'Authorization'])
 
@@ -137,6 +157,12 @@ def refresh():
 @jwt_required()
 def get_me_route():
     return get_me(member)
+
+# Admin
+@app.route("/admin/upload-image", methods=["POST"])
+@jwt_required()
+def upload_image_route():
+    return upload_image_endpoint(events=events, images=images, members=member, admins=admin)
 
 # Events (events collection)
 @app.route("/events/<event_id>", methods=["GET"])
