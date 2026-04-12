@@ -1,19 +1,56 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Secrets / local config
-.env
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Python
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+#vscode
+.vscode
+__pycache__
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env files and virtual environment (can opt-in for committing if needed)
+.env*
+.venv/
+venv/
+
+# python
+__pycache__
 __pycache__/
-*.pyc
-*.pyo
 .pytest_cache/
 
-# Virtualenv (this repo currently has one vendored)
-bin/
-lib/
-pyvenv.cfg
+# vscode
+.vscode/
 
-# OS/editor junk
-.DS_Store
-.Rhistory
+# Internal API specs (do not publish from OSS repo)
+openapi-internal.yaml
+openapi-internal-post-migration.yaml
+
+# Root-level venv artifacts (if a venv was created in repo root)
+/bin/
+/lib/
+/pyvenv.cfg

@@ -1,7 +1,7 @@
 from flask import jsonify
 from datetime import datetime, timezone
 from pymongo import DESCENDING
-from event_routes.event_helpers import serialize_mongo_doc
+from helpers.serialize import serialize_mongo_doc, serialize_id
 
 def get_past_events(events):
     current = datetime.now(timezone.utc)
@@ -15,7 +15,6 @@ def get_past_events(events):
             "location": 1,
             "type": 1,
             "image_path": 1,
-            "cover_image_path": 1
         }
         # filter for past, non-fotw, published only events
         events_list = list(events.find({
@@ -34,14 +33,8 @@ def get_past_events(events):
 
     # serialize the events
     events_list = serialize_mongo_doc(events_list)
-    # expose _id as id for response clarity
-    for event in events_list:
-        event["id"] = event.pop("_id")
-        # Transitional compatibility during schema migration.
-        image_path = event.get("image_path") or event.get("cover_image_path")
-        if image_path is not None:
-            event["image_path"] = image_path
-            event["cover_image_path"] = image_path
+    # serialize the id field
+    events_list = serialize_id(events_list)
 
     # return a JSON response
     return jsonify({

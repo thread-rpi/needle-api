@@ -14,3 +14,15 @@ def serialize_mongo_doc(obj):
     elif isinstance(obj, datetime):
         return obj.isoformat()
     return obj
+
+def serialize_id(obj):
+  """
+  Serialize the _id field of a document to an id field.
+  """
+  if isinstance(obj, dict) and "_id" in obj:
+    obj["id"] = str(obj["_id"])
+    obj.pop("_id")
+  elif isinstance(obj, list):
+    for item in obj:
+      serialize_id(item)
+  return obj
